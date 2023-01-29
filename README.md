@@ -6,4 +6,4 @@ A program to keep track of one's session count with the ARRL VEC
 
 Read the ChangeLog for details.
 
-Check the wiki for more information.
+Check the **Wiki** for more information.

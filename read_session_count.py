@@ -19,6 +19,7 @@ def get_count(self,state):
     website = gv.arrl_url + state
     today = []
     result = []
+    update_flag = False
     
     ## windows needs this
     ## works okay in Linux
@@ -71,16 +72,43 @@ def get_count(self,state):
             db_connection.commit()
             
         else: ## record exists, do an update
+            update_flag = True
             tag_update = '1'
             values = tuple([record[3],tag_update,call_check[0]]) ## set
             sql = "UPDATE ve_count SET scount = ?, tag = ? WHERE call = ?"
             db_cursor.execute(sql,values)
             db_connection.commit()
     
-    ## TODO: add to menu, a purge of entries where after an update, tag_column = '0'
-    ## VE can lose accreditation or pass away. Without a purge function, they will
-    ## occupy entries in database
-           
+    ## Only execute this next code if an update was accomplished
+    
+    if update_flag: ## Auto-Purge
+        
+        ## Do we have any records which where not updated?
+        values = []
+        values.append('0')
+        values.append(state)
+        db_cursor.execute("SELECT * FROM ve_count WHERE tag = ? and state = ?",tuple(values))
+        ve_records = db_cursor.fetchall()
+        ## Check if we have any and delete them
+        if len(ve_records) > 0:
+            sql_purge = "DELETE FROM ve_count WHERE call = ? and state = ?"
+            for record in ve_records:
+                values = []
+                values.append(record[1])
+                values.append(state)
+                db_cursor.execute(sql_purge,tuple(values))
+            db_connection.commit()
+        ## Reset tags to '0' for next update
+        db_cursor.execute("SELECT * FROM ve_count")
+        ve_records = db_cursor.fetchall()
+        sql_update = "UPDATE ve_count SET tag = ? WHERE call = ?"
+        for record in ve_records:
+            values = []
+            values.append('0')
+            values.append(record[1])
+            db_cursor.execute(sql_update,tuple(values))
+        db_connection.commit()
+          
     ## update the date of this action in 'settings' table
     today_date = str(date.today())
     today.append(today_date)

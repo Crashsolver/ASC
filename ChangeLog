@@ -5,3 +5,11 @@ V 0.90.1  Some minor GUI fixes
 V 0.91  Added Auto-Update functionality
 
 V 0.91.1 Fixed lookup without entering a callsign
+
+V 0.92  Added an Auto-Purge function to the Update function. This removes any VE who has lost 
+        their ARRL accreditation from the database. Also reworked the Lookup button. If one 
+        has registered their callsign, clicking on the button without entering a callsign 
+        will automatically lookup one's statistics. Also reworked the Summary report. For
+        1x2 or 2x1 callsigns, if there is a multiple match, one can add a '!' to the end
+        of their callsign which will restrict the matching process. It's not perfect. Dropped
+        the "Import by State" option which was for testing purposes.

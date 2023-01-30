@@ -68,7 +68,7 @@ class Update(Thread):
                 text = "Auto-Update: Updating database at {}.\n".format(datetime.now())
                 self.display_widget.insert(tk.END,text)
                 self.called_function()
-                text = "Auto-Update: Finished Update at {}.\n".format(datetime.now())
+                text = "Auto-Update: Finished Update at {}.\n\n".format(datetime.now())
                 self.display_widget.insert(tk.END,text)
             else:
                 self.no_skip = True
@@ -141,7 +141,6 @@ class App(tk.Tk):
     def set_menu(self):
         self.menubar = tk.Menu(self)
         self.filemenu = tk.Menu(self.menubar, tearoff = 0)
-        self.filemenu.add_command(label="Import/Update State Session Counts",command=lambda: self.get_state_data())
         self.filemenu.add_command(label="Import/Update All Session Counts",command=lambda: self.get_arrl_data())
         self.filemenu.add_command(label="Set Defaults", command=lambda: sud.set_defaults(self))
         self.filemenu.add_separator()
@@ -241,6 +240,14 @@ class App(tk.Tk):
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM settings")
         self.settings_check = db_cursor.fetchone()
+        #print("setting: ",self.settings_check)
+        if len(gv.settings) == 0:
+            self.ur_call_var.set(self.settings_check[1])
+            self.as_of_var.set(self.settings_check[2])
+        else:
+            self.ur_call_var.set(gv.settings[1])
+            self.as_of_var.set(gv.settings[2])
+        
         if self.running == False and self.settings_check[4] == '1':
             
             ## Inserting default auto-update values into the 'settings' table
@@ -336,18 +343,28 @@ class App(tk.Tk):
         self.their_accreditation.set('')
 
     def get_lookup_data(self):
+        tmp_list = []
+        sql_text = "SELECT * FROM ve_count WHERE call LIKE ?"
         lookup_callsign = self.their_lookup_var.get()
         ## was button clicked without entering a callsign?
-        if len(lookup_callsign) == 0:
+        if lookup_callsign == 'NOCALL':
             return
-        lup_callsign = '%'+lookup_callsign.upper()+'%'
+        elif len(lookup_callsign) == 0:
+            lookup_callsign = self.ur_call_var.get()
+            self.result_text.delete(1.0,tk.END)
+        ## check for no wildcard match condition
+        if lookup_callsign[-1] == '!':
+            lup_callsign = lookup_callsign[:-1].upper()+'%'
+        else:
+            lup_callsign = '%'+lookup_callsign.upper()+'%'
+        
         #self.result_text.delete(1.0,tk.END)
         db_connection = sqlite3.connect(gv.asc_database)
         db_cursor = db_connection.cursor()
-        tmp_list = []
+        
         tmp_list.append(lup_callsign)
         try:
-            db_cursor.execute("SELECT * FROM ve_count WHERE call LIKE ?",tuple(tmp_list))
+            db_cursor.execute(sql_text,tuple(tmp_list))
             record_check = db_cursor.fetchall()
         except:
             record_check = None
@@ -377,7 +394,10 @@ class App(tk.Tk):
                     text_line = "Count:{}, Call:{}, County:{}, State:{}\n".format(r[4],r[1],r[2],r[5])
                     self.result_text.insert(tk.END,text_line)
         else:
-            text = "Callsign {} was not found!".format(lookup_callsign)
+            if lookup_callsign[-1] == '!':
+                ls = lookup_callsign[:-1]
+                lookup_callsign = ls
+            text = "Callsign {} was not found!".format(lookup_callsign.upper())+'\n'
             self.result_text.insert(tk.END,text)
         self.update_idletasks()
     

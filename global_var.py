@@ -1,6 +1,6 @@
 ## program vars
 program = "ARRL Session Count for VEs"
-version = "0.91.1"
+version = "0.92"
 
 top_window_x = 1280
 top_window_y = 700

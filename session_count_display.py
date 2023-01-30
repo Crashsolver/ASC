@@ -41,14 +41,17 @@ def session_count_data(self):
     self.my_state = ""
     self.my_count = ""
     self.my_record = ""
+    self.zero_count = ""
     self.ve_total_people = ""
     self.ve_total_higher = ""
     self.ve_total_equal = ""
     self.ve_total_lower = ""
+    self.ve_total_zero = ""
     self.ve_state_people = ""
     self.ve_state_higher = ""
     self.ve_state_equal = ""
     self.ve_state_lower = ""
+    self.ve_state_zero = ""
     
     sql_by_state = "SELECT COUNT(*) FROM ve_count WHERE state LIKE ?"
     sql_by_total = "SELECT COUNT(*) FROM ve_count"
@@ -94,6 +97,16 @@ def session_count_data(self):
         db_cursor.execute(sql_by_call,tuple(tmp_result))
         self.my_record = db_cursor.fetchone()
         self.my_count = self.my_record[4]  ## scount?
+               
+        tmp_result = []
+        tmp_result.append('1')
+        db_cursor.execute(sql_by_total_lower_count,tuple(tmp_result))
+        result = db_cursor.fetchall()
+        self.ve_total_zero = result[0][0]
+        tmp_result.append('%'+self.my_state+'%')
+        db_cursor.execute(sql_by_state_lower_count,tuple(tmp_result))
+        result = db_cursor.fetchall()
+        self.ve_state_zero = result[0][0]
         
         tmp_result = []
         tmp_result.append(self.my_count)
@@ -151,37 +164,43 @@ def session_count_data(self):
     #text_text = ""
     
     ## Report texts
-    text_text = "Statistics for ARRL accredited VEs\n\n"
+    text_text = "Statistics for ARRL accredited VEs as of {}.\n\n".format(self.db_date)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} accredited VEs as of {}.\n\n".format(self.ve_total_people,self.db_date)
+    text_text = "{} overall statistics:\n\n".format(self.my_callsign)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} accredited VEs in the state of {}.\n\n".format(self.ve_state_people,self.my_state)
+    text_text = "\tThere are {} accredited VEs.\n\n".format(self.ve_total_people)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "{} overall statistics\n".format(self.my_callsign)
+    text_text = "\tThere are {} VEs with higher session counts.\n".format(self.ve_total_higher)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with higher session counts.\n".format(self.ve_total_higher)
+    text_text = "\tThere are {} VEs with equal session counts.\n".format(self.ve_total_equal)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with equal session counts.\n".format(self.ve_total_equal)
+    text_text = "\tThere are {} VEs with lower session counts.\n\n".format(self.ve_total_lower)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with lower session counts.\n\n".format(self.ve_total_lower)
+    text_text = "\tThere are {} VEs with a zero session count.\n\n".format(self.ve_total_zero)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "{} state statistics\n".format(self.my_callsign)
+    text_text = "{} state statistics:\n\n".format(self.my_callsign)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with higher session counts.\n".format(self.ve_state_higher)
+    text_text = "\tThere are {} accredited VEs in the state of {}.\n\n".format(self.ve_state_people,self.my_state)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with equal session counts.\n".format(self.ve_state_equal)
+    text_text = "\tThere are {} VEs with higher session counts.\n".format(self.ve_state_higher)
     self.result_text2.insert(tk.END,text_text)
     
-    text_text = "There are {} VEs with lower session counts.\n\n".format(self.ve_state_lower)
+    text_text = "\tThere are {} VEs with equal session counts.\n".format(self.ve_state_equal)
+    self.result_text2.insert(tk.END,text_text)
+    
+    text_text = "\tThere are {} VEs with lower session counts.\n\n".format(self.ve_state_lower)
+    self.result_text2.insert(tk.END,text_text)
+    
+    text_text = "\tThere are {} VEs with a zero session count.\n\n".format(self.ve_state_zero)
     self.result_text2.insert(tk.END,text_text)
     
     text_text = "End of report\n"

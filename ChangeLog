@@ -13,3 +13,5 @@ V 0.92  Added an Auto-Purge function to the Update function. This removes any VE
         1x2 or 2x1 callsigns, if there is a multiple match, one can add a '!' to the end
         of their callsign which will restrict the matching process. It's not perfect. Dropped
         the "Import by State" option which was for testing purposes.
+
+V 0.92.1 Added a check for a new VE during an update

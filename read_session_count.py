@@ -52,7 +52,12 @@ def get_count(self,state):
             index += 1
         ## append the state
         ve_record.append(state)
-        ve_record.append(initial_tag) ## set the update tag to false
+        ## If we are doing an update and call is not in the database
+        ## set the tag as an update before inserting into the database
+        ## to prevent the auto-purge from removing the entry
+        if update_flag: 
+            initial_tag = '1'
+        ve_record.append(initial_tag) ## set the update tag
         ## if a blank was returned, do an insert
         if record_check == None or record_check == []:
             index = 0
